@@ -1,34 +1,209 @@
+{% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{{ title }}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(to bottom right, #0f2027, #203a43, #2c5364);
+      color: #fff;
+      padding: 2rem;
+      overflow-x: hidden;
+    }
+    h1, h2 {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    h1 {
+      font-size: 3rem;
+      color: #00f2fe;
+      text-shadow: 2px 2px 5px rgba(0, 242, 254, 0.7);
+      animation: fadeInDown 1s ease forwards;
+    }
+    h2 {
+      color: #ffe600;
+      margin-top: 3rem;
+      margin-bottom: 1rem;
+      animation: fadeInUp 1s ease forwards;
+    }
+    p.intro {
+      max-width: 700px;
+      margin: 0 auto 2rem;
+      font-size: 1.2rem;
+      line-height: 1.6;
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 0 10px rgba(255,255,255,0.1);
+      animation: fadeIn 1.5s ease forwards;
+    }
+    .video-container {
+      position: relative;
+      padding-bottom: 56.25%; /* 16:9 */
+      height: 0;
+      max-width: 900px;
+      margin: 2rem auto;
+      box-shadow: 0 0 20px #00f2fe;
+      border-radius: 15px;
+      overflow: hidden;
+      animation: fadeIn 1.8s ease forwards;
+    }
+    .video-container iframe {
+      position: absolute;
+      top:0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    .comparison {
+      max-width: 900px;
+      margin: 3rem auto 0;
+      display: flex;
+      justify-content: space-around;
+      gap: 2rem;
+      animation: fadeInUp 2s ease forwards;
+      flex-wrap: wrap;
+    }
+    .comparison .card {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      padding: 1.5rem;
+      flex: 1 1 30%;
+      box-shadow: 0 0 10px rgba(255,255,255,0.15);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      cursor: pointer;
+    }
+    .comparison .card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 10px 20px rgba(0, 242, 254, 0.5);
+    }
+    .comparison .card h3 {
+      color: #00f2fe;
+      margin-bottom: 0.8rem;
+    }
+    .comparison .card p {
+      font-size: 1rem;
+      line-height: 1.4;
+      color: #fff;
+    }
+    .comparison .card a {
+      margin-top: 1rem;
+      display: inline-block;
+      color: #ffe600;
+      font-weight: bold;
+      text-decoration: none;
+      border-bottom: 2px solid transparent;
+      transition: border-color 0.3s ease;
+    }
+    .comparison .card a:hover {
+      border-color: #00f2fe;
+    }
+    nav {
+      text-align: center;
+      margin-top: 3rem;
+    }
+    nav a {
+      color: #00f2fe;
+      text-decoration: none;
+      margin: 0 1rem;
+      font-weight: 700;
+      font-size: 1.1rem;
+      transition: color 0.3s ease;
+    }
+    nav a:hover {
+      color: #ffe600;
+    }
+    .back-button {
+      margin-top: 3rem;
+      text-align: center;
+    }
+    .back-button a {
+      background-color: #003366;
+      color: white;
+      padding: 0.75rem 1.5rem;
+      text-decoration: none;
+      font-weight: bold;
+      border-radius: 8px;
+      transition: background 0.3s ease;
+    }
+    .back-button a:hover {
+      background-color: #0059b3;
+    }
+
+    /* Animations */
+    @keyframes fadeInDown {
+      0% {
+        opacity: 0;
+        transform: translateY(-40px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    @keyframes fadeInUp {
+      0% {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    @keyframes fadeIn {
+      0% {
+        opacity: 0;
+      }
+      100% {
+        opacity: 1;
+      }
+    }
+  </style>
 </head>
 <body>
   <h1>{{ title }}</h1>
 
-  {% if data %}
-    <ul>
-      {% for item in data.0.items %}
-        <li><strong>{{ item.0 }}</strong>: {{ item.1 }}</li>
-      {% endfor %}
-    </ul>
-  {% else %}
-    <p>No data available for {{ exchange }}.</p>
-  {% endif %}
+  <p class="intro">
+    Welcome to the Crypto Dashboard Central, a platform that allows you to explore real-time data from major cryptocurrency exchanges such as Binance and WazirX. Here you can compare the behavior of different markets, analyze prices, trends, and much more—all in one place. We use reliable APIs and modern technologies to offer you the best experience.
+  </p>
 
-  <hr>
+  <div class="video-container">
+    <iframe src="https://www.youtube.com/embed/fjgDFwW23v0?autoplay=1&mute=1&loop=1&playlist=fjgDFwW23v0" title="Crypto world explanation" allow="autoplay" allowfullscreen></iframe>
+  </div>
+
+  <h2>Exchange Comparison</h2>
+<div class="comparison">
+  <div class="card">
+    <h3>📈 Market Overview</h3>
+    <p>Understand the basic structure of crypto markets. Learn how symbols work, how to read pairings like BTC/USDT, and familiarize yourself with global market behavior across exchanges.</p>
+    <a href="{% url 'crypto_market_overview' %}">Go to Market Overview</a>
+  </div>
+
+  <div class="card">
+    <h3>💰 Binance</h3>
+    <p>One of the largest exchanges worldwide, offering a wide variety of pairs and high liquidity. Ideal for both beginners and experienced traders.</p>
+    <a href="{% url 'binance_market_data' %}">Go to Binance</a>
+  </div>
+
+  <div class="card">
+    <h3>🔥 WazirX</h3>
+    <p>A popular exchange in India, rapidly growing with strong integration with Binance. Great for regional trading insights and altcoins.</p>
+    <a href="{% url 'wazirx_market_data' %}">Go to WazirX</a>
+  </div>
+</div>
+
+
   <nav>
-    <a href="/">Overview</a> |
-    <a href="/binance/">Binance</a> |
-    <a href="/wazirx/">WazirX</a>
+    <a href="{% url 'crypto_market_overview' %}">Market Overview</a> |
+    <a href="{% url 'binance_market_data' %}">Binance</a> |
+    <a href="{% url 'wazirx_market_data' %}">WazirX</a>
   </nav>
-
-  <h1>Crypto Dashboard Central</h1>
-  <ul>
-    <li><a href="{% url 'crypto_market_overview' %}">Market Overview</a></li>
-    <li><a href="{% url 'binance_market_data' %}">Binance Market</a></li>
-    <li><a href="{% url 'wazirx_market_data' %}">WazirX Market</a></li>
-  </ul>
-
 </body>
 </html>

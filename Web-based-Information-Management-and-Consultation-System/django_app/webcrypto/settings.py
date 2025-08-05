@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
-
+import mongoengine
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -29,6 +29,16 @@ ALLOWED_HOSTS = []
 
 
 # Application definition
+
+
+MONGO_DB_NAME = 'project_db'
+MONGO_HOST = 'mongodb://root:example@localhost:27017/project_db'
+
+# Conecta mongoengine a MongoDB
+mongoengine.connect(
+    db=MONGO_DB_NAME,
+    host=MONGO_HOST
+)
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -120,4 +130,6 @@ STATIC_URL = 'static/'
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'crypto_list'     # Redirige a la lista después del login exitoso
+LOGOUT_REDIRECT_URL = 'login'         # Redirige al login después del logout
