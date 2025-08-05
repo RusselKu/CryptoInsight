@@ -1,0 +1,57 @@
+# Python cache and bytecode
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Logs and databases
+*.log
+*.sqlite3
+*.db
+
+# Environment variables
+.env
+.env.*
+
+# IDEs
+.vscode/
+.idea/
+
+# Jupyter/IPython
+.ipynb_checkpoints/
+
+# Airflow
+airflow.db
+airflow.cfg
+logs/
+
+# Docker
+*.pid
+*.sock
+*.tar
+*.img
+
+# Streamlit
+.streamlit/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Testing
+.pytest_cache/
+htmlcov/
+.coverage
+.tox/
+.nox/
+
+# Build and packaging
+build/
+dist/
+*.egg-info/
+
+# Miscellaneous
+*.bak
+*.tmp
+*.swp
+*.orig

@@ -1,0 +1,28 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>📊 Binance 24h Market Data</title>
+    <link rel="stylesheet" href="{% static 'crypto/css/styles.css' %}">
+</head>
+<body>
+    <h1>📊 Binance 24h Market Data</h1>
+
+    {% if warning %}
+        <p style="color: orange;">{{ warning }}</p>
+    {% else %}
+        <div>
+            <strong>Symbols Tracked:</strong> {{ total_symbols }}<br>
+            <strong>Top Symbol:</strong> {{ top_symbol }}<br>
+            <strong>Source:</strong> {{ source }}
+        </div>
+
+        <h2>📋 Filtered Binance Data</h2>
+        <div>
+            {{ table_html|safe }}
+        </div>
+
+        <!-- Aquí podrías agregar gráficos con plotly.js -->
+    {% endif %}
+</body>
+</html>

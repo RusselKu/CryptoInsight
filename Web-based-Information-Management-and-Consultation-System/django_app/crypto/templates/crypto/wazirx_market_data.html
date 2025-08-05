@@ -1,0 +1,36 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>📂 WazirX 24h Market Data</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link rel="stylesheet" href="{% static 'crypto/css/styles.css' %}">
+</head>
+<body>
+    <h1>📂 WazirX 24h Market Data</h1>
+
+    {% if warning %}
+        <p style="color: orange;">{{ warning }}</p>
+    {% else %}
+        <div>
+            <strong>Symbols Tracked:</strong> {{ total_symbols }}<br>
+            <strong>Top Pair:</strong> {{ top_symbol }}<br>
+            <strong>Source:</strong> {{ source }}
+        </div>
+
+        <h2>📊 High vs Low Price (Top 10 by High Price)</h2>
+        <div id="wazirx-chart"></div>
+
+        <h2>📋 Filtered WazirX Data</h2>
+        <div>
+            {{ table_html|safe }}
+        </div>
+
+        <script>
+            var graphJsonStr = `{{ graph_json|safe }}`;
+            var graphData = JSON.parse(graphJsonStr);
+            Plotly.newPlot('wazirx-chart', graphData.data, graphData.layout);
+        </script>
+    {% endif %}
+</body>
+</html>

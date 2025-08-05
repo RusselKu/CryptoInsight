@@ -1,0 +1,22 @@
+# Django framework
+Django>=4.2
+
+# MongoDB drivers
+pymongo
+dnspython
+pymongo[srv]
+
+# API requests
+requests
+
+# Data processing
+pandas
+numpy
+pyarrow
+
+# Utilities
+python-dotenv
+python-dateutil
+
+# Visualización
+plotly

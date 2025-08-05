@@ -1,0 +1,28 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>📈 Cryptocurrency Market Overview</title>
+    <link rel="stylesheet" href="{% static 'crypto/css/styles.css' %}">
+</head>
+<body>
+    <h1>📈 Cryptocurrency Market Overview</h1>
+
+    {% if warning %}
+        <p style="color: orange;">{{ warning }}</p>
+    {% else %}
+        <div>
+            <strong>Total Coins:</strong> {{ total_coins }}<br>
+            <strong>Top Coin:</strong> {{ top_coin }}<br>
+            <strong>Source:</strong> {{ source }}
+        </div>
+
+        <!-- Aquí irían tus gráficos, luego adaptados con plotly.js -->
+
+        <h2>📋 Simplified Data View</h2>
+        <div>
+            {{ table_html|safe }}
+        </div>
+    {% endif %}
+</body>
+</html>

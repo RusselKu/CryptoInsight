@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>{{ title }}</title>
+</head>
+<body>
+  <h1>{{ title }}</h1>
+
+  {% if data %}
+    <ul>
+      {% for item in data.0.items %}
+        <li><strong>{{ item.0 }}</strong>: {{ item.1 }}</li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No data available for {{ exchange }}.</p>
+  {% endif %}
+
+  <hr>
+  <nav>
+    <a href="/">Overview</a> |
+    <a href="/binance/">Binance</a> |
+    <a href="/wazirx/">WazirX</a>
+  </nav>
+
+  <h1>Crypto Dashboard Central</h1>
+  <ul>
+    <li><a href="{% url 'crypto_market_overview' %}">Market Overview</a></li>
+    <li><a href="{% url 'binance_market_data' %}">Binance Market</a></li>
+    <li><a href="{% url 'wazirx_market_data' %}">WazirX Market</a></li>
+  </ul>
+
+</body>
+</html>
