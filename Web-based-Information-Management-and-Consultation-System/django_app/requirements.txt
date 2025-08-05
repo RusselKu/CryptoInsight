@@ -20,3 +20,5 @@ python-dateutil
 
 # Visualización
 plotly
+mongoengine
+django
