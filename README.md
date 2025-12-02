@@ -175,6 +175,7 @@ docker compose up --build
 * Django Dashboard: [http://localhost:8000/dashboard/](http://localhost:8000/dashboard/)
 * MongoDB Compass:
   `mongodb://root:example@localhost:27017/project_db?authSource=admin`
+  docker exec -it web-based-information-management-and-consultation-system-mongodb-1 mongosh -u root -p example --authenticationDatabase admin
 
 
 ## 🛠️ **Custom Django Admin Panel and Security**
