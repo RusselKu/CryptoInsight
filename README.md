@@ -173,7 +173,7 @@ docker compose up --build
 
 * Airflow UI: [http://localhost:8080](http://localhost:8080)
 * Django Dashboard: [http://localhost:8000/dashboard/](http://localhost:8000/dashboard/)
-* MongoDB Compass (optional):
+* MongoDB Compass:
   `mongodb://root:example@localhost:27017/project_db?authSource=admin`
 
 
