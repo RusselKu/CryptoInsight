@@ -1,3 +1,4 @@
+import requests
 from django.shortcuts import render
 
 # Create your views here.
@@ -89,7 +90,33 @@ def crypto_market_overview(request):
                 "id", "symbol", "name", "image",
                 "current_price", "price_change_24h", "price_change_percentage_24h"
             ]
-            df = pd.DataFrame(crypto_list)[columns_to_show]
+            df = pd.DataFrame(crypto_list)
+
+            # --- Call Prediction API ---
+            try:
+                # Running inside Docker, so we can use the service name or localhost
+                prediction_url = "http://localhost:8000/predictions/crypto-predictions/"
+                response = requests.get(prediction_url)
+                response.raise_for_status() # Raise an exception for bad status codes
+                predictions_data = response.json().get('predictions', [])
+                
+                if predictions_data:
+                    preds_df = pd.DataFrame(predictions_data)[['symbol', 'prediction']]
+                    # Convert prediction from 0/1 to a more descriptive string
+                    preds_df['Prediction'] = preds_df['prediction'].apply(lambda x: 'Up' if x == 1 else 'Down')
+                    
+                    # Merge predictions into the main dataframe
+                    df = pd.merge(df, preds_df[['symbol', 'Prediction']], on='symbol', how='left')
+                    # Add 'Prediction' to the columns to show if it's not already there
+                    if 'Prediction' not in columns_to_show:
+                        columns_to_show.append('Prediction')
+
+            except requests.exceptions.RequestException as e:
+                print(f"Could not get predictions from API: {e}")
+                df['Prediction'] = 'N/A' # Add a placeholder column
+            
+            df = df[columns_to_show]
+            # --- End Prediction API Call ---
 
             # Ajustar formato de columnas numéricas
             df["current_price"] = df["current_price"].map(lambda x: f"${x:,.2f}")

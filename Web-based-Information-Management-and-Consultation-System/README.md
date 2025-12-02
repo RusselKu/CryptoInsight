@@ -106,6 +106,53 @@ Service orchestration is handled with **Docker Compose**.
 
 ---
 
+## 🚀 **Predictive Model: Logistic Regression**
+
+A new machine learning feature has been integrated into the project to predict cryptocurrency price movements based on the data collected from the CoinGecko API.
+
+### 1. Objective
+
+The model uses **Logistic Regression** to perform a binary classification, predicting whether the price of a cryptocurrency will **increase (Up)** or **decrease (Down)** over a 24-hour period. The prediction is based on the `price_change_percentage_24h` feature.
+
+### 2. Implementation
+
+The entire machine learning workflow is encapsulated within the new `predictions` Django app.
+
+#### **Training Pipeline (`predictions/train_model.py`)**
+
+A dedicated script handles the end-to-end process of training and saving the model:
+
+1.  **Data Loading:** Loads the latest processed data from the `processed_crypto_market` collection in MongoDB.
+2.  **Feature Engineering:**
+    *   Creates the binary target variable `price_will_increase` (1 for a positive price change, 0 otherwise).
+    *   Selects relevant numerical features (e.g., `current_price`, `market_cap`, `total_volume`).
+    *   Applies `StandardScaler` to normalize the features, which is crucial for logistic regression.
+3.  **Model Training:** Splits the data into training and testing sets and trains a `LogisticRegression` model from the `scikit-learn` library.
+4.  **Artifact Saving:** The trained model and the fitted scaler are serialized and saved as `.joblib` files (`logistic_regression_model.joblib`, `scaler.joblib`) within the `predictions` app directory.
+
+### 3. How It Works: API and Frontend
+
+#### **Prediction API (`/predictions/crypto-predictions/`)**
+
+*   An API endpoint was created to serve the model's predictions.
+*   When called, this endpoint loads the saved model and scaler.
+*   It fetches the latest crypto data, preprocesses it using the saved scaler, and feeds it to the model.
+*   The API returns a JSON response containing the prediction ("Up" or "Down") for each cryptocurrency.
+
+#### **Frontend Integration**
+
+*   The `crypto_market_overview` view has been updated to call the prediction API.
+*   The predictions are merged with the cryptocurrency data being displayed.
+*   A new **"Prediction"** column is now visible in the main data table on the home page, showing the model's prediction for each coin.
+
+### 4. Automated Retraining with Airflow
+
+*   A new DAG, `retrain_crypto_prediction_model`, has been added.
+*   **Purpose:** This DAG automatically re-runs the `train_model.py` script on a daily schedule.
+*   This ensures the model is continuously retrained with the latest market data, preventing model drift and maintaining its relevance over time.
+
+---
+
 ## 🗃️ **MongoDB Collections**
 
 | Collection                  | Content                  |

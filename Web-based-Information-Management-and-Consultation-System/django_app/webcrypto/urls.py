@@ -11,4 +11,7 @@ urlpatterns = [
 
     # Rutas app crypto
     path('', include('crypto.urls')),
+
+    # Rutas app predictions
+    path('predictions/', include('predictions.urls')),
 ]
