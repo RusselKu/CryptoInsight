@@ -32,8 +32,7 @@ ALLOWED_HOSTS = []
 
 
 MONGO_DB_NAME = 'project_db'
-MONGO_HOST = 'mongodb://root:example@localhost:27017/project_db'
-
+MONGO_HOST = 'mongodb://127.0.0.1:27017/project_db'
 # Conecta mongoengine a MongoDB
 mongoengine.connect(
     db=MONGO_DB_NAME,
@@ -47,6 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
     'crypto',
     'predictions',
 ]
@@ -58,6 +58,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
@@ -127,10 +128,14 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
-
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'crypto_list'     # Redirige a la lista después del login exitoso
 LOGOUT_REDIRECT_URL = 'login'         # Redirige al login después del logout
+# Permitir que React (puerto 5173) pida datos a Django
+CORS_ALLOW_ALL_ORIGINS = True

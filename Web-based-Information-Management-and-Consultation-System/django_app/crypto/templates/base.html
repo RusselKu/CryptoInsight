@@ -1,0 +1,38 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}Crypto Dashboard{% endblock %}</title>
+    
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}" />
+    
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+
+    <div class="matrix-background">
+        <div class="code-stream">1 0 1 0 0 1 0 1 1 0</div>
+        <div class="code-stream">0 1 0 1 1 0 1 0 0 1</div>
+        <div class="code-stream">1 1 0 0 1 0 1 1 0 0</div>
+        <div class="code-stream">0 0 1 1 0 1 0 1 0 1</div>
+        <div class="code-stream">1 0 1 0 1 1 0 0 1 0</div>
+        <div class="code-stream">0 1 1 0 0 1 0 1 1 0</div>
+        <div class="code-stream">1 0 0 1 1 0 1 0 0 1</div>
+        <div class="code-stream">0 1 0 1 0 0 1 1 0 0</div>
+    </div>
+
+    {% if user.is_authenticated %}
+        <div style="text-align: right; padding: 10px; background: rgba(0,20,0,0.8); border-bottom: 1px solid #00ff41;">
+            <small style="color: #00ff62; font-family: monospace;">OPERATOR: {{ user.username }} | <a href="{% url 'logout' %}" style="color: #fff; text-decoration: underline;">DISCONNECT</a></small>
+        </div>
+    {% endif %}
+
+    <div style="position: relative; z-index: 2;">
+        {% block content %}
+        {% endblock %}
+    </div>
+
+</body>
+</html>

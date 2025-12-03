@@ -1,133 +1,44 @@
+{% extends "base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>📂 WazirX 24h Market Data</title>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <link rel="stylesheet" href="{% static 'crypto/css/styles.css' %}">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
+
+{% block title %}📂 WazirX Market Data{% endblock %}
+
+{% block content %}
+    
     <div class="back-button">
         <a href="{% url 'main_dashboard' %}">&larr; Back to Main Dashboard</a>
     </div>
-    <style>
-        body {
-            margin: 0;
-            font-family: 'Montserrat', sans-serif;
-            background: linear-gradient(to right, #141e30, #243b55);
-            color: #fff;
-            padding: 2rem;
-        }
-        h1, h2 {
-            text-align: center;
-        }
-        h1 {
-            font-size: 2.5rem;
-            color: #00e5ff;
-            text-shadow: 1px 1px 4px #000;
-        }
-        h2 {
-            color: #ffe600;
-            margin-top: 2rem;
-        }
-        .info {
-            background-color: rgba(255,255,255,0.1);
-            padding: 1rem;
-            border-radius: 12px;
-            max-width: 600px;
-            margin: 1rem auto;
-            text-align: center;
-            font-size: 1.1rem;
-            box-shadow: 0 0 12px rgba(255, 255, 224, 0.4);
-        }
-        #wazirx-chart-bar, #wazirx-chart-line {
-            margin-top: 2rem;
-            max-width: 900px;
-            margin-left: auto;
-            margin-right: auto;
-            border-radius: 12px;
-            padding: 1rem;
-            background: rgba(255, 255, 255, 0.05);
-            box-shadow: 0 0 18px rgba(0, 229, 255, 0.5);
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 1.5rem;
-            background: rgba(255, 255, 255, 0.9);
-            color: #222;
-            border-radius: 12px;
-            overflow: hidden;
-        }
-        th, td {
-            padding: 0.75rem;
-            text-align: center;
-            border: 1px solid #ddd;
-        }
-        th {
-            background: linear-gradient(to right, #005f73, #0a9396);
-            color: white;
-        }
-        tr:hover {
-            background-color: #f0f8ff;
-            transition: background-color 0.3s ease;
-        }
-        td img {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        td img:hover {
-            transform: scale(1.2);
-            box-shadow: 0 0 12px rgba(0, 229, 255, 0.6);
-        }
-        .back-button {
-            margin-top: 2rem;
-            text-align: center;
-        }
-        .back-button a {
-            background-color: #003366;
-            color: white;
-            padding: 0.75rem 1.5rem;
-            text-decoration: none;
-            font-weight: bold;
-            border-radius: 8px;
-            transition: background 0.3s;
-        }
-        .back-button a:hover {
-            background-color: #0059b3;
-        }
-    </style>
-</head>
-<body>
+
     <h1>📂 WazirX 24h Market Data</h1>
 
     {% if warning %}
-        <p style="color: orange; text-align: center; font-weight: bold;">{{ warning }}</p>
+        <p style="color: var(--matrix-green); text-align: center; font-weight: bold; border: 1px dashed var(--matrix-green); padding: 10px;">{{ warning }}</p>
     {% else %}
-        <div class="info">
+        <div class="info-box">
             <strong>Symbols Tracked:</strong> {{ total_symbols }}<br />
             <strong>Top Pair:</strong> {{ top_symbol }}<br />
             <strong>Source:</strong> {{ source }}
         </div>
 
-        <h2>📊 High vs Low Price (Top 10 by High Price)</h2>
-        <div id="wazirx-chart-bar"></div>
+        <div class="chart-container">
+            <h2>📊 High vs Low Price (Top 10)</h2>
+            <div id="wazirx-chart-bar"></div>
+        </div>
 
-        <h2>📈 Open Price (Top 10 by High Price)</h2>
-        <div id="wazirx-chart-line"></div>
+        <div class="chart-container">
+            <h2>📈 Open Price (Top 10)</h2>
+            <div id="wazirx-chart-line"></div>
+        </div>
 
         <div class="chart-container">
             <h2>📈 Historical Price Chart</h2>
-            <select id="symbol-select">
+            <select id="symbol-select" style="padding: 10px; border-radius: 5px; background: #000; color: #00ff41; border: 1px solid #00ff41;">
                 <option value="">Select a Symbol</option>
                 {% for symbol in symbols %}
                     <option value="{{ symbol }}">{{ symbol }}</option>
                 {% endfor %}
             </select>
-            <button id="load-chart-btn">Load Chart</button>
+            <button id="load-chart-btn" class="btn">Load Chart</button>
             <div id="historical-chart"></div>
         </div>
 
@@ -137,87 +48,56 @@
         </div>
     {% endif %}
 
-    <div class="back-button">
-        <a href="{% url 'main_dashboard' %}">&larr; Back to Main Dashboard</a>
-    </div>
+    <script>        const matrixLayout = {
+            plot_bgcolor: 'rgba(0,0,0,0)',
+            paper_bgcolor: 'rgba(0,0,0,0)',
+            font: { color: '#00ff41', family: 'Share Tech Mono, monospace' },
+            xaxis: { showgrid: false, color: '#00ff41' },
+            yaxis: { showgrid: true, gridcolor: 'rgba(0, 255, 65, 0.2)', color: '#00ff41' },
+            margin: { t: 40, b: 40, l: 60, r: 40 }
+        };
 
-    <script>
         {% if graph_json_bar and graph_json_line %}
             var graphBar = JSON.parse('{{ graph_json_bar|escapejs }}');
             var graphLine = JSON.parse('{{ graph_json_line|escapejs }}');
 
-            // Estilo para Bar chart - colores dinámicos, estilo vivo
+  
             graphBar.data.forEach(trace => {
                 trace.marker = {
                     color: trace.y,
-                    colorscale: 'Portland', // paleta vibrante con verdes y naranjas
-                    line: {
-                        color: '#00e5ff',
-                        width: 2
-                    },
-                    showscale: true,
+                    colorscale: [[0, '#003300'], [1, '#00ff41']], 
+                    line: { color: '#00ff41', width: 1 },
+                    showscale: false
                 };
             });
-            graphBar.layout = {
-                ...graphBar.layout,
-                plot_bgcolor: '#243b55',
-                paper_bgcolor: '#243b55',
-                font: { color: '#00e5ff', family: 'Montserrat, sans-serif' },
-                margin: { t: 60, b: 50, l: 60, r: 40 },
-                xaxis: { showgrid: false },
-                yaxis: { showgrid: true, gridcolor: 'rgba(0,229,255,0.15)' }
-            };
+            Object.assign(graphBar.layout, matrixLayout);
 
-            // Estilo para Line chart - colores dinámicos y fondo combinado
             graphLine.data.forEach(trace => {
                 if(trace.type === 'scatter') {
-                    trace.line = {
-                        color: 'rgba(0,229,255,0.8)',
-                        width: 4
-                    };
-                    trace.marker = {
-                        color: 'rgba(0,229,255,1)',
-                        size: 8,
-                        line: { color: '#fff', width: 1 }
-                    };
+                    trace.line = { color: '#00ff41', width: 2 };
+                    trace.marker = { color: '#000', size: 6, line: { color: '#00ff41', width: 2 } }; 
                 }
             });
-            graphLine.layout = {
-                ...graphLine.layout,
-                plot_bgcolor: '#243b55',
-                paper_bgcolor: '#243b55',
-                font: { color: '#00e5ff', family: 'Montserrat, sans-serif' },
-                margin: { t: 60, b: 50, l: 60, r: 40 },
-                xaxis: { showgrid: false, zeroline: false },
-                yaxis: { showgrid: true, gridcolor: 'rgba(0,229,255,0.15)' }
-            };
+            Object.assign(graphLine.layout, matrixLayout);
 
             Plotly.newPlot('wazirx-chart-bar', graphBar.data, graphBar.layout);
             Plotly.newPlot('wazirx-chart-line', graphLine.data, graphLine.layout);
         {% endif %}
 
+
         document.getElementById('load-chart-btn').addEventListener('click', function() {
             let symbol = document.getElementById('symbol-select').value;
-            if (!symbol) {
-                alert('Please select a symbol.');
-                return;
-            }
+            if (!symbol) { alert('Please select a symbol.'); return; }
 
-            // The symbol from the dropdown is in the format 'btcinr'. The API expects 'btc'.
-            const apiSymbol = symbol.replace('inr', '');
+            const apiSymbol = symbol; 
 
             fetch(`/predictions/wazirx/history/${apiSymbol}/`)
                 .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
+                    if (!response.ok) throw new Error('Network response was not ok');
                     return response.json();
                 })
                 .then(data => {
-                    if (data.error) {
-                        alert(data.error);
-                        return;
-                    }
+                    if (data.error) { alert(data.error); return; }
 
                     const historicalData = data.historical_data;
                     const trace = {
@@ -225,25 +105,22 @@
                         y: historicalData.map(d => d.last_price),
                         mode: 'lines+markers',
                         type: 'scatter',
-                        name: symbol
+                        name: symbol,
+                        line: { color: '#00ff41', width: 2 },
+                        marker: { color: '#000', size: 6, line: {color: '#00ff41', width: 1} }
                     };
 
-                    const layout = {
-                        title: `Historical Price for ${symbol}`,
-                        xaxis: { title: 'Timestamp' },
-                        yaxis: { title: 'Price' },
-                        plot_bgcolor: "#141e30",
-                        paper_bgcolor: "#141e30",
-                        font: { color: "#00e5ff" }
+                    const histLayout = {
+                        title: `History: ${symbol}`,
+                        ...matrixLayout
                     };
 
-                    Plotly.newPlot('historical-chart', [trace], layout);
+                    Plotly.newPlot('historical-chart', [trace], histLayout);
                 })
                 .catch(error => {
-                    console.error('Error fetching historical data:', error);
+                    console.error('Error:', error);
                     alert('An error occurred while fetching historical data.');
                 });
         });
     </script>
-</body>
-</html>
+{% endblock %}

@@ -1,16 +1,33 @@
 {% extends "base.html" %}
 
-{% block content %}
-  {% if user.is_authenticated %}
-    <p>Logged in as {{ user.username }} | <a href="{% url 'logout' %}">Logout</a></p>
-  {% else %}
-    <p><a href="{% url 'login' %}">Login</a></p>
-  {% endif %}
+{% block title %}WARNING: DELETE{% endblock %}
 
-  <h2>Delete Crypto Market</h2>
-  <p>Are you sure you want to delete {{ item.symbol }}?</p>
-  <form method="post">{% csrf_token %}
-    <button type="submit">Confirm Delete</button>
-    <a href="{% url 'crypto_list' %}">Cancel</a>
-  </form>
+{% block content %}
+
+    <div class="info-box" style="max-width: 600px; margin-top: 4rem; border-color: #ff0000; box-shadow: 0 0 20px rgba(255, 0, 0, 0.2);">
+        
+        <h2 style="color: #ff0000; text-shadow: 0 0 10px #ff0000; border-bottom: 1px solid #ff0000;">
+            ⚠️ CRITICAL WARNING ⚠️
+        </h2>
+
+        <p style="font-size: 1.2rem; margin: 2rem 0;">
+            Are you sure you want to purge <strong style="color: #fff; font-size: 1.4rem;">{{ item.symbol }}</strong> from the mainframe?
+            <br><br>
+            <span style="font-size: 0.9rem; color: #ff4d4d;">[THIS ACTION CANNOT BE UNDONE]</span>
+        </p>
+
+        <form method="post">
+            {% csrf_token %}
+            <div style="display: flex; justify-content: center; gap: 20px;">
+                <a href="{% url 'crypto_list' %}" class="btn">
+                    CANCEL PROTOCOL
+                </a>
+                
+                <button type="submit" class="btn" style="background: #300000; border-color: #ff0000; color: #ff0000; box-shadow: 0 0 5px #ff0000;">
+                    CONFIRM PURGE
+                </button>
+            </div>
+        </form>
+    </div>
+
 {% endblock %}

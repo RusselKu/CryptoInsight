@@ -1,234 +1,99 @@
+{% extends "base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>📊 Binance 24h Market Data</title>
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
-<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <div class="back-button">
-        <a href="{% url 'main_dashboard' %}">&larr; Back to Main Dashboard</a>
-    </div>
-<style>
-    body {
-        margin: 0;
-        font-family: 'Roboto', sans-serif;
-        background: linear-gradient(to right, #1f4037, #99f2c8);
-        color: #fff;
-        padding: 2rem;
-    }
-    h1, h2 {
-        text-align: center;
-    }
-    h1 {
-        font-size: 2.5rem;
-        color: #ffe600;
-        text-shadow: 1px 1px 4px #000;
-    }
-    h2 {
-        margin-top: 2rem;
-        color: #ffffff;
-    }
-    .info {
-        background-color: rgba(0,0,0,0.4);
-        padding: 1rem;
-        border-radius: 12px;
-        max-width: 600px;
-        margin: 0 auto 2rem auto;
-        text-align: center;
-    }
-    table {
-        border-collapse: collapse;
-        width: 100%;
-        margin-top: 1rem;
-        background: rgba(255, 255, 255, 0.85);
-        color: #222;
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 0 20px rgba(255,255,255,0.3);
-        animation: fadeIn 0.8s ease-in-out;
-    }
-    th, td {
-        border: 1px solid #ddd;
-        padding: 0.75rem;
-        text-align: center;
-    }
-    th {
-        background: linear-gradient(90deg, #6a11cb, #2575fc);
-        color: white;
-        text-transform: uppercase;
-        font-size: 0.95rem;
-    }
-    tr:hover {
-        background-color: rgba(173, 216, 230, 0.3);
-        transition: 0.3s;
-    }
-    .chart-container {
-        max-width: 900px;
-        margin: 2rem auto;
-        background: rgba(255,255,255,0.1);
-        border-radius: 12px;
-        padding: 1rem;
-        box-shadow: 0 0 20px rgba(255,255,255,0.2);
-    }
-    .back-button {
-        margin-top: 2rem;
-        display: flex;
-        justify-content: center;
-    }
-    .back-button a {
-        background-color: #003366;
-        color: white;
-        padding: 0.75rem 1.5rem;
-        text-decoration: none;
-        font-weight: bold;
-        border-radius: 8px;
-        transition: background 0.3s;
-    }
-    .back-button a:hover {
-        background-color: #0059b3;
-    }
 
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-</style>
-</head>
-<body>
+{% block title %}📊 Binance 24h Data{% endblock %}
+
+{% block content %}
+    <div class="back-button">
+        <a href="{% url 'main_dashboard' %}">&larr; Back to Dashboard</a>
+    </div>
+
     <h1>📊 Binance 24h Market Data</h1>
 
     {% if warning %}
         <p style="color: orange; text-align: center; font-weight: bold;">{{ warning }}</p>
     {% else %}
-        <div class="info">
+        <div class="info-box">
             <strong>Symbols Tracked:</strong> {{ total_symbols }}<br />
             <strong>Top Symbol:</strong> {{ top_symbol }}<br />
             <strong>Source:</strong> {{ source }}
         </div>
 
-        <!-- Gráficas -->
         <div class="chart-container">
-            <h2>🌈 Scatter Plot: Price Difference (High - Low)</h2>
+            <h2>🌈 Scatter Plot: Price Difference</h2>
             <div id="scatter-chart"></div>
         </div>
 
         <div class="chart-container">
-            <h2>📶 Bar Chart: Price Change vs Lowest Price</h2>
+            <h2>📶 Bar Chart: Price Change</h2>
             <div id="bar-chart"></div>
         </div>
 
         <div class="chart-container">
             <h2>📈 Historical Price Chart</h2>
-            <select id="symbol-select">
+            <select id="symbol-select" style="padding: 10px; border-radius: 5px;">
                 <option value="">Select a Symbol</option>
                 {% for symbol in symbols %}
                     <option value="{{ symbol }}">{{ symbol }}</option>
                 {% endfor %}
             </select>
-            <button id="load-chart-btn">Load Chart</button>
+            <button id="load-chart-btn" class="btn">Load Chart</button>
             <div id="historical-chart"></div>
         </div>
 
-        <!-- Tabla -->
         <h2>📋 Filtered Binance Data</h2>
         <div>
             {{ table_html|safe }}
         </div>
     {% endif %}
 
+    <script>
+    {% if scatter_chart and bar_chart %}
+        let scatterData = JSON.parse('{{ scatter_chart|escapejs }}');
+        let barData = JSON.parse('{{ bar_chart|escapejs }}');
 
 
-<script>
-{% if scatter_chart and bar_chart %}
-    let scatterData = JSON.parse('{{ scatter_chart|escapejs }}');
-    let barData = JSON.parse('{{ bar_chart|escapejs }}');
-
-    // 🎨 Colores dinámicos para scatter
-    scatterData.data.forEach(trace => {
-        trace.marker = {
-            color: trace.y,
-            colorscale: 'Viridis',
-            size: 10,
-            showscale: true,
-            line: {
-                color: '#fff',
-                width: 1
-            }
+        const commonLayout = {
+            plot_bgcolor: "rgba(0,0,0,0)",
+            paper_bgcolor: "rgba(0,0,0,0)",
+            font: { color: "#fff" }
         };
+
+
+        Object.assign(scatterData.layout, commonLayout);
+        Object.assign(barData.layout, commonLayout);
+
+        Plotly.newPlot('scatter-chart', scatterData.data, scatterData.layout);
+        Plotly.newPlot('bar-chart', barData.data, barData.layout);
+    {% endif %}
+
+    document.getElementById('load-chart-btn').addEventListener('click', function() {
+        const symbol = document.getElementById('symbol-select').value;
+        if (!symbol) { alert('Please select a symbol.'); return; }
+
+        fetch(`/predictions/binance/history/${symbol}/`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.error) { alert(data.error); return; }
+                const trace = {
+                    x: data.historical_data.map(d => d.timestamp),
+                    y: data.historical_data.map(d => d.last_price),
+                    mode: 'lines+markers',
+                    type: 'scatter',
+                    name: symbol,
+                    marker: { color: '#00f2fe' }
+                };
+                const layout = {
+                    title: `History: ${symbol}`,
+                    xaxis: { title: 'Timestamp', color: '#fff' },
+                    yaxis: { title: 'Price', color: '#fff' },
+                    plot_bgcolor: "rgba(0,0,0,0)",
+                    paper_bgcolor: "rgba(0,0,0,0)",
+                    font: { color: "#fff" }
+                };
+                Plotly.newPlot('historical-chart', [trace], layout);
+            })
+            .catch(err => console.error(err));
     });
-
-    scatterData.layout.plot_bgcolor = "#1f4037";
-    scatterData.layout.paper_bgcolor = "#1f4037";
-    scatterData.layout.font = { color: "#fff" };
-
-    // 🎨 Colores dinámicos para bar chart
-    barData.data.forEach(trace => {
-        trace.marker = {
-            color: trace.y,
-            colorscale: 'Cividis',
-            line: {
-                color: 'rgba(0,0,0,0.8)',
-                width: 1
-            }
-        };
-    });
-
-    barData.layout.plot_bgcolor = "#1f4037";
-    barData.layout.paper_bgcolor = "#1f4037";
-    barData.layout.font = { color: "#fff" };
-
-    Plotly.newPlot('scatter-chart', scatterData.data, scatterData.layout);
-    Plotly.newPlot('bar-chart', barData.data, barData.layout);
-{% endif %}
-
-document.getElementById('load-chart-btn').addEventListener('click', function() {
-    const symbol = document.getElementById('symbol-select').value;
-    if (!symbol) {
-        alert('Please select a symbol.');
-        return;
-    }
-
-    fetch(`/predictions/binance/history/${symbol}/`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.error) {
-                alert(data.error);
-                return;
-            }
-
-            const historicalData = data.historical_data;
-            const trace = {
-                x: historicalData.map(d => d.timestamp),
-                y: historicalData.map(d => d.last_price),
-                mode: 'lines+markers',
-                type: 'scatter',
-                name: symbol
-            };
-
-            const layout = {
-                title: `Historical Price for ${symbol}`,
-                xaxis: { title: 'Timestamp' },
-                yaxis: { title: 'Price' },
-                plot_bgcolor: "#1f4037",
-                paper_bgcolor: "#1f4037",
-                font: { color: "#fff" }
-            };
-
-            Plotly.newPlot('historical-chart', [trace], layout);
-        })
-        .catch(error => {
-            console.error('Error fetching historical data:', error);
-            alert('An error occurred while fetching historical data.');
-        });
-});
-</script>
-
-</body>
-</html>
+    </script>
+{% endblock %}

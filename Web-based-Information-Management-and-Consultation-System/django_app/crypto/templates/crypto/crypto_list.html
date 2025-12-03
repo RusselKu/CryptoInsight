@@ -1,37 +1,56 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block title %}Admin: Crypto List{% endblock %}
 
 {% block content %}
-  {% if user.is_authenticated %}
-    <p>Logged in as {{ user.username }} | <a href="{% url 'logout' %}">Logout</a></p>
-  {% else %}
-    <p><a href="{% url 'login' %}">Login</a></p>
-  {% endif %}
+    
+    <div style="max-width: 900px; margin: 2rem auto; display: flex; justify-content: space-between; align-items: center;">
+        <h2 style="margin: 0; text-shadow: none; border: none;">📂 SYSTEM DATA</h2>
+        <a href="{% url 'crypto_create' %}" class="btn">➕ INJECT NEW DATA</a>
+    </div>
 
-  <h2>Crypto Market List</h2>
-  <a href="{% url 'crypto_create' %}">Add New</a>
-  <table>
-    <thead>
-      <tr>
-        <th>Symbol</th>
-        <th>Price</th>
-        <th>Volume</th>
-        <th>Last Updated</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for item in items %}
-        <tr>
-          <td>{{ item.symbol }}</td>
-          <td>{{ item.price }}</td>
-          <td>{{ item.volume }}</td>
-          <td>{{ item.last_updated }}</td>
-          <td>
-            <a href="{% url 'crypto_edit' item.pk %}">Edit</a> |
-            <a href="{% url 'crypto_delete' item.pk %}">Delete</a>
-          </td>
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+    <div class="chart-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>SYMBOL</th>
+                    <th>PRICE (USD)</th>
+                    <th>VOLUME</th>
+                    <th>LAST UPDATE</th>
+                    <th>ACTIONS</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for item in items %}
+                <tr>
+                    <td style="font-weight: bold; color: var(--matrix-green); letter-spacing: 1px;">
+                        {{ item.symbol|upper }}
+                    </td>
+                    <td>${{ item.price }}</td>
+                    <td>{{ item.volume }}</td>
+                    <td style="font-size: 0.85rem; color: #aaa;">
+                        {{ item.last_updated|date:"Y-m-d H:i" }}
+                    </td>
+                    <td>
+                        <a href="{% url 'crypto_edit' item.pk %}" style="color: #ffe600; text-decoration: none; font-weight: bold;">[EDIT]</a>
+                        <span style="color: var(--matrix-dark-green);">|</span>
+                        <a href="{% url 'crypto_delete' item.pk %}" style="color: #ff4d4d; text-decoration: none; font-weight: bold;">[DEL]</a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="5" style="padding: 2rem; color: #888;">
+                        [SYSTEM MESSAGE]: No data found in the mainframe.
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="back-button">
+        <a href="{% url 'main_dashboard' %}">&larr; RETURN TO DASHBOARD</a>
+    </div>
+
 {% endblock %}

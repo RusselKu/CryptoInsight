@@ -1,209 +1,86 @@
+{% extends "base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>📈 Cryptocurrency Market Overview</title>
 
-  <!-- Estilos y fuentes -->
-  <link rel="stylesheet" href="{% static 'crypto/css/styles.css' %}" />
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
-  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-  <div class="back-button">
-    <a href="{% url 'main_dashboard' %}">&larr; Back to Main Dashboard</a>
-  </div>
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Montserrat', sans-serif;
-      background: linear-gradient(to top right, #0f0c29, #302b63, #24243e);
-      color: #fff;
-      padding: 2rem;
-    }
+{% block title %}📈 Market Overview{% endblock %}
 
-    h1, h2 {
-      text-align: center;
-    }
-
-    h1 {
-      font-size: 2.5rem;
-      color: #ffcc00;
-      text-shadow: 2px 2px 4px #000;
-    }
-
-    h2 {
-      margin-top: 2rem;
-      color: #ffffff;
-    }
-
-    .info {
-      background: rgba(255,255,255,0.1);
-      padding: 1rem;
-      border-radius: 12px;
-      max-width: 600px;
-      margin: 0 auto 2rem auto;
-      text-align: center;
-      font-size: 1.1rem;
-      box-shadow: 0 0 12px rgba(255, 255, 255, 0.2);
-    }
-
-    .chart-container {
-      max-width: 900px;
-      margin: 2rem auto;
-      border-radius: 12px;
-      padding: 1rem;
-      background: rgba(255,255,255,0.05);
-      box-shadow: 0 0 20px rgba(0,0,0,0.3);
-    }
-
-    .back-button {
-      margin-top: 2rem;
-      display: flex;
-      justify-content: center;
-    }
-
-    .back-button a {
-      background-color: #4b0082;
-      color: white;
-      padding: 0.75rem 1.5rem;
-      text-decoration: none;
-      font-weight: bold;
-      border-radius: 8px;
-      transition: background 0.3s;
-    }
-
-    .back-button a:hover {
-      background-color: #7a1fa2;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 1.5rem;
-      background: rgba(255, 255, 255, 0.9);
-      color: #222;
-      border-radius: 12px;
-      overflow: hidden;
-    }
-
-    th, td {
-      padding: 0.75rem;
-      text-align: center;
-      border: 1px solid #ddd;
-    }
-
-    th {
-      background: linear-gradient(to right, #4b0082, #800080);
-      color: white;
-    }
-
-    tr:hover {
-      background-color: #f2f2f2;
-      transition: background-color 0.3s ease;
-    }
-
-    td img {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    td img:hover {
-      transform: scale(1.2);
-      box-shadow: 0 0 12px rgba(0, 0, 0, 0.4);
-    }
-
-    /* Plotly dynamic colors */
-    .js-plotly-plot .scatterlayer .trace.scatter .points path {
-      transition: all 0.4s ease;
-    }
-
-    .js-plotly-plot:hover .scatterlayer .trace.scatter .points path {
-      fill: #ff4081 !important;
-      stroke: #ff4081 !important;
-    }
-  </style>
-</head>
-
-<body>
-  <h1>📈 Cryptocurrency Market Overview</h1>
-
-  {% if warning %}
-    <p style="color: orange; text-align: center; font-weight: bold;">{{ warning }}</p>
-  {% else %}
-    <div class="info">
-      <strong>Total Coins:</strong> {{ total_coins }}<br />
-      <strong>Top Coin:</strong> {{ top_coin }}<br />
-      <strong>Source:</strong> {{ source }}
+{% block content %}
+    
+    <div class="back-button">
+        <a href="{% url 'main_dashboard' %}">&larr; Back to Dashboard</a>
     </div>
 
-    <div class="chart-container">
-      <h2>Top 10 Cryptocurrencies by Current Price</h2>
-      <div id="top10-chart"></div>
-    </div>
+    <h1>📈 Cryptocurrency Market Overview</h1>
 
-    <div class="chart-container">
-      <h2>6 Worst Performing Cryptocurrencies (24h % Change)</h2>
-      <div id="worst6-chart"></div>
-    </div>
+    {% if warning %}
+        <p style="color: var(--matrix-green); text-align: center; font-weight: bold; border: 1px dashed var(--matrix-green); padding: 10px;">{{ warning }}</p>
+    {% else %}
+        <div class="info-box">
+            <strong>Total Coins:</strong> {{ total_coins }}<br />
+            <strong>Top Coin:</strong> {{ top_coin }}<br />
+            <strong>Source:</strong> {{ source }}
+        </div>
 
-    <h2>📋 Simplified Data View</h2>
-    <div>
-      {{ table_html|safe }}
-    </div>
-  {% endif %}
+        <div class="chart-container">
+            <h2>Top 10 Cryptocurrencies by Current Price</h2>
+            <div id="top10-chart"></div>
+        </div>
 
-  <script>
-    const top10 = JSON.parse('{{ top_10_chart|escapejs }}');
-    const worst6 = JSON.parse('{{ worst_6_chart|escapejs }}');
+        <div class="chart-container">
+            <h2>6 Worst Performing Cryptocurrencies (24h % Change)</h2>
+            <div id="worst6-chart"></div>
+        </div>
 
-    // Apply dynamic, vibrant colors and style layouts
+        <h2>📋 Simplified Data View</h2>
+        <div>
+            {{ table_html|safe }}
+        </div>
+    {% endif %}
 
-    // Top10 chart colorscale & styling
-    top10.data.forEach(trace => {
-      trace.marker = {
-        color: trace.y,
-        colorscale: 'Viridis',  // prueba 'Viridis', 'Turbo', 'Jet', 'Cividis'
-        size: 12,
-        showscale: true,
-        line: { color: '#fff', width: 1 }
-      };
-      if(trace.type === 'bar') {
-        trace.marker.line.width = 2;
-      }
-    });
-    top10.layout = {
-      ...top10.layout,
-      plot_bgcolor: '#302b63',
-      paper_bgcolor: '#302b63',
-      font: { color: '#fff', family: 'Montserrat, sans-serif' },
-      margin: { t: 50, b: 50, l: 60, r: 40 },
-      xaxis: { showgrid: false },
-      yaxis: { showgrid: true, gridcolor: 'rgba(255,255,255,0.15)' }
-    };
+    <script>
+        const top10 = JSON.parse('{{ top_10_chart|escapejs }}');
+        const worst6 = JSON.parse('{{ worst_6_chart|escapejs }}');
 
-    // Worst6 chart colorscale & styling
-    worst6.data.forEach(trace => {
-      trace.marker = {
-        color: trace.y,
-        colorscale: 'Turbo',
-        line: { color: 'rgba(255,255,255,0.7)', width: 1.5 }
-      };
-    });
-    worst6.layout = {
-      ...worst6.layout,
-      plot_bgcolor: '#302b63',
-      paper_bgcolor: '#302b63',
-      font: { color: '#fff', family: 'Montserrat, sans-serif' },
-      margin: { t: 50, b: 50, l: 60, r: 40 },
-      xaxis: { showgrid: false },
-      yaxis: { showgrid: true, gridcolor: 'rgba(255,255,255,0.15)' }
-    };
 
-    Plotly.newPlot('top10-chart', top10.data, top10.layout);
-    Plotly.newPlot('worst6-chart', worst6.data, worst6.layout);
-  </script>
-</body>
-</html>
+        const matrixLayout = {
+            plot_bgcolor: 'rgba(0,0,0,0)',  
+            paper_bgcolor: 'rgba(0,0,0,0)',
+            font: { 
+                color: '#00ff41',          
+                family: 'Share Tech Mono, monospace' 
+            },
+            xaxis: { 
+                showgrid: false, 
+                color: '#00ff41' 
+            },
+            yaxis: { 
+                showgrid: true, 
+                gridcolor: 'rgba(0, 255, 65, 0.2)', 
+                color: '#00ff41'
+            }
+        };
+
+
+        top10.data.forEach(trace => {
+            trace.marker = {
+                color: '#00ff41', 
+                line: { color: '#000', width: 1 }
+            };
+        });
+
+        Object.assign(top10.layout, matrixLayout);
+        
+  
+        worst6.data.forEach(trace => {
+            trace.marker = {
+
+                colors: ['#8b0000', '#a52a2a', '#b22222', '#dc143c', '#ff0000', '#ff6347'],
+                line: { color: '#000', width: 1 }
+            };
+        });
+        Object.assign(worst6.layout, matrixLayout);
+
+        Plotly.newPlot('top10-chart', top10.data, top10.layout);
+        Plotly.newPlot('worst6-chart', worst6.data, worst6.layout);
+    </script>
+
+{% endblock %}

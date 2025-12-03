@@ -1,16 +1,71 @@
 {% extends "base.html" %}
 
-{% block content %}
-  {% if user.is_authenticated %}
-    <p>Logged in as {{ user.username }} | <a href="{% url 'logout' %}">Logout</a></p>
-  {% else %}
-    <p><a href="{% url 'login' %}">Login</a></p>
-  {% endif %}
+{% block title %}
+    {% if form.instance.pk %}EDIT DATA{% else %}NEW ENTRY{% endif %}
+{% endblock %}
 
-  <h2>{% if form.instance and form.instance.pk %}Edit{% else %}Add{% endif %} Crypto Market</h2>
-  <form method="post">{% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Save</button>
-    <a href="{% url 'crypto_list' %}">Cancel</a>
-  </form>
+{% block content %}
+
+    <style>
+        /* Estilos locales para transformar el formulario de Django en estilo Matrix */
+        .matrix-form p {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+        .matrix-form label {
+            display: block;
+            color: var(--matrix-green);
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        .matrix-form input[type="text"],
+        .matrix-form input[type="number"],
+        .matrix-form input[type="email"] {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid var(--matrix-dark-green);
+            color: #fff;
+            padding: 10px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1rem;
+            box-sizing: border-box; /* Para que el padding no rompa el ancho */
+        }
+        .matrix-form input:focus {
+            outline: none;
+            border-color: var(--matrix-green);
+            box-shadow: 0 0 10px var(--matrix-green);
+        }
+        .helptext {
+            font-size: 0.8rem;
+            color: #888;
+            display: block;
+            margin-top: 5px;
+        }
+    </style>
+
+    <div class="info-box" style="max-width: 500px; margin-top: 3rem; text-align: left;">
+        <h2 style="border-bottom: 1px dashed var(--matrix-green); padding-bottom: 10px; margin-bottom: 20px;">
+            {% if form.instance.pk %}
+                [UPDATE SEQUENCE]: {{ form.instance.symbol }}
+            {% else %}
+                [INITIATE NEW SEQUENCE]
+            {% endif %}
+        </h2>
+
+        <form method="post" class="matrix-form">
+            {% csrf_token %}
+            
+            {{ form.as_p }}
+            
+            <div style="margin-top: 2rem; display: flex; justify-content: space-between;">
+                <a href="{% url 'crypto_list' %}" class="btn" style="border-color: #ff4d4d; color: #ff4d4d;">
+                    &times; ABORT
+                </a>
+                <button type="submit" class="btn">
+                    &#10004; EXECUTE SAVE
+                </button>
+            </div>
+        </form>
+    </div>
+
 {% endblock %}

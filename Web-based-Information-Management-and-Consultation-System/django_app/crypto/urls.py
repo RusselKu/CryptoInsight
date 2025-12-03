@@ -1,9 +1,28 @@
-from django.urls import path, include
-from django.contrib import admin
+from django.urls import path
 from . import views
-from .views import main_dashboard, crypto_market_overview, binance_market_data, wazirx_market_data
+
+# Importamos explícitamente las vistas para mayor claridad
+from .views import (
+    main_dashboard, 
+    crypto_market_overview, 
+    binance_market_data, 
+    wazirx_market_data, 
+    api_market_overview,  # <--- IMPORTANTE: La nueva vista API
+    crypto_list,
+    crypto_create,
+    crypto_edit,
+    crypto_delete
+)
 
 urlpatterns = [
+    # --- NUEVA RUTA API (Para conectar tu futuro React/Next.js) ---
+    path('api/market-overview/', views.api_market_overview, name='api_market_overview'),
+    path('api/binance/', views.api_binance_data, name='api_binance_data'),
+    path('api/wazirx/', views.api_wazirx_data, name='api_wazirx_data'),
+
+    # -------------------------------------------------------------
+
+    # Rutas originales (Legacy - Para que no se rompa tu dashboard actual)
     path('', views.crypto_market_overview, name='crypto_market_overview'),
     path('binance/', views.binance_market_data, name='binance_market_data'),
     path('wazirx/', views.wazirx_market_data, name='wazirx_market_data'),

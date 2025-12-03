@@ -7,7 +7,7 @@ WORKDIR /app
 COPY . .
 
 # Instalar dependencias
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --default-timeout=1000 --no-cache-dir -r requirements.txt
 
 # Migraciones iniciales (puedes comentarlo si no tienes el proyecto creado aún)
 # RUN python manage.py migrate
