@@ -23,8 +23,17 @@ with DAG(
 ) as dag:
     retrain_task = BashOperator(
         task_id='retrain_model',
-        # Command to execute the train_model.py script inside the Django container
-        # Note: This assumes the Django container is running and accessible
-        # The /app/predictions/train_model.py path is relative to the Django container's WORKDIR
         bash_command='docker exec web-based-information-management-and-consultation-system-django-1 python /app/predictions/train_model.py',
     )
+
+    retrain_binance_task = BashOperator(
+        task_id='retrain_binance_model',
+        bash_command='docker exec web-based-information-management-and-consultation-system-django-1 python /app/predictions/train_binance.py',
+    )
+
+    retrain_wazirx_task = BashOperator(
+        task_id='retrain_wazirx_model',
+        bash_command='docker exec web-based-information-management-and-consultation-system-django-1 python /app/predictions/train_wazirx.py',
+    )
+
+    [retrain_task, retrain_binance_task, retrain_wazirx_task]
