@@ -2,6 +2,7 @@
 
 This project implements a **Batch ETL Pipeline** using **Apache Airflow** to extract, transform, and load cryptocurrency data from 3 main APIs.
 The data is stored in **MongoDB** and visualized via a **Django web dashboard**, featuring dedicated routes for each data source and a central overview dashboard.
+It also includes a **Machine Learning component** to predict cryptocurrency price movements.
 Service orchestration is handled with **Docker Compose**.
 
 ---
@@ -10,33 +11,35 @@ Service orchestration is handled with **Docker Compose**.
 
 ```
 .
-├── dags/                           # Airflow DAGs for ETL
+├── dags/                           # Airflow DAGs for ETL and ML
 │   ├── binance_ticker_ingestion.py
 │   ├── cryptocurrencymarket.py
 │   ├── wazirx_ticker_ingestion.py
-│   ├── load_mongo.py
+│   ├── retrain_model_dag.py        # Retrains all predictive models
 │   ├── main_pipeline.py            # Master orchestration
 │   └── utils/
 │       ├── api_helpers.py
 │       └── mongo_utils.py
-├── webcrypto/                     # Django project (app 'crypto')
-│   ├── crypto/
+├── django_app/                     # Django project
+│   ├── crypto/                     # Main crypto app for views and templates
 │   │   ├── templates/crypto/
 │   │   │   ├── market_overview.html
 │   │   │   ├── binance_market_data.html
 │   │   │   ├── wazirx_market_data.html
 │   │   │   └── main_dashboard.html
 │   │   ├── views.py
-│   │   ├── urls.py
-│   │   └── ...
-│   ├── webcrypto/
-│   │   ├── settings.py
-│   │   ├── urls.py
-│   │   └── ...
-│   └── manage.py
+│   │   └── urls.py
+│   ├── predictions/                # App for ML models and predictions
+│   │   ├── train_model.py          # CoinGecko model training
+│   │   ├── train_binance.py        # Binance model training
+│   │   ├── train_wazirx.py         # WazirX model training
+│   │   ├── views.py                # API endpoints for predictions
+│   │   └── urls.py
+│   ├── utils/                      # Utility functions (db connection)
+│   └── webcrypto/                  # Django project settings
 ├── docker-compose.yml             # Container orchestrator
 ├── requirements.txt
-├── Dockerfile                    # Airflow (and optionally Django) image
+├── Dockerfile                    # Airflow  image
 └── README.md
 ```
 
@@ -45,11 +48,12 @@ Service orchestration is handled with **Docker Compose**.
 ## ⚙️ **Technologies Used**
 
 * **Orchestration:** Apache Airflow
-* **Web Backend:** Django 5.2
+* **Web Backend:** Django
 * **Database:** MongoDB
-* **Web Visualization:** Django Templates (HTML + optional Bootstrap)
+* **Web Visualization:** Django Templates, Plotly.js
 * **Containers:** Docker & Docker Compose
-* **Python Libraries:** pandas, plotly, pymongo, requests
+* **Machine Learning:** Scikit-learn
+* **Python Libraries:** pandas, plotly, pymongo, requests, scikit-learn
 
 ---
 
@@ -72,84 +76,52 @@ Service orchestration is handled with **Docker Compose**.
 
 ---
 
-## 💾 **ETL Pipeline**
+## 🖥️ **Django Dashboard Features**
 
-* **Extract:** Raw JSON data from the 3 APIs
-* **Transform:** Data cleaning, metadata enrichment, KPI calculations
-* **Load:** Processed data stored in MongoDB collections `processed_*`, raw data stored in `raw_*` collections
+The web dashboard provides a comprehensive overview of the cryptocurrency market from the three data sources.
+
+### **1. Main Dashboards**
+*   **CoinGecko Overview:** Displays a table with the top 100 cryptocurrencies, their prices, and 24h price changes. Includes charts for the top 10 best and worst performing assets.
+*   **Binance Market Data:** Shows a filtered list of active trading pairs from Binance, with their price changes and high/low prices.
+*   **WazirX Market Data:** Displays active trading pairs from WazirX, with open, high, and low prices.
+
+### **2. Predictive Models**
+For each data source, a **Logistic Regression** model predicts whether the price will **increase (Up)** or **decrease (Down)** in the next 24 hours. The "Prediction" column is displayed in the main table for each data source.
+
+### **3. Interactive Historical Charts**
+On the Binance and WazirX pages, users can select a trading pair from a dropdown menu to view an interactive historical chart of its price over time. This allows for a more detailed analysis of the asset's performance.
+
+---
+
+## 🚀 **Machine Learning Pipeline**
+
+The project includes a full machine learning pipeline for price movement prediction, from data processing to automated retraining.
+
+### **1. Training Pipelines**
+*   Dedicated training scripts (`train_model.py`, `train_binance.py`, `train_wazirx.py`) are used for each data source.
+*   **Feature Engineering:** Custom feature engineering is applied to each dataset to prepare it for training.
+*   **Model Training:** A `LogisticRegression` model is trained for each data source.
+*   **Artifact Saving:** The trained models and scalers are saved as `.joblib` files.
+
+### **2. Prediction APIs**
+*   The `predictions` Django app exposes API endpoints to get predictions for each data source.
+*   These APIs are called by the frontend to display the "Prediction" column.
+
+### **3. Historical Data APIs**
+*   The `predictions` app also provides API endpoints to get historical price data for a given symbol, which is used to power the interactive charts.
 
 ---
 
 ## 🔄 **Airflow DAGs**
 
-* `cryptocurrencymarket.py` (CoinGecko data ingestion)
-* `binance_ticker_ingestion.py` (Binance data ingestion)
-* `wazirx_ticker_ingestion.py` (WazirX data ingestion)
-* `load_mongo.py` (optional consolidation)
-* `main_pipeline.py` (master orchestrator, triggers all DAGs with TriggerDagRunOperator)
-
----
-
-## 🖥️ **Django Dashboard**
-
-* Routes configured in `crypto/urls.py`:
-
-| Route         | View                     | Description                       |
-| ------------- | ------------------------ | --------------------------------- |
-| `/`           | `crypto_market_overview` | CoinGecko general market overview |
-| `/binance/`   | `binance_market_data`    | Binance market data and analysis  |
-| `/wazirx/`    | `wazirx_market_data`     | WazirX market data and analysis   |
-| `/dashboard/` | `main_dashboard`         | Central dashboard with links      |
-
-* Views (`crypto/views.py`) use helper functions in `utils/mongo_utils.py` to query MongoDB.
-* Templates located in `crypto/templates/crypto/` render tables and interactive Plotly.js charts.
-
----
-
-## 🚀 **Predictive Model: Logistic Regression**
-
-A new machine learning feature has been integrated into the project to predict cryptocurrency price movements based on the data collected from the CoinGecko API.
-
-### 1. Objective
-
-The model uses **Logistic Regression** to perform a binary classification, predicting whether the price of a cryptocurrency will **increase (Up)** or **decrease (Down)** over a 24-hour period. The prediction is based on the `price_change_percentage_24h` feature.
-
-### 2. Implementation
-
-The entire machine learning workflow is encapsulated within the new `predictions` Django app.
-
-#### **Training Pipeline (`predictions/train_model.py`)**
-
-A dedicated script handles the end-to-end process of training and saving the model:
-
-1.  **Data Loading:** Loads the latest processed data from the `processed_crypto_market` collection in MongoDB.
-2.  **Feature Engineering:**
-    *   Creates the binary target variable `price_will_increase` (1 for a positive price change, 0 otherwise).
-    *   Selects relevant numerical features (e.g., `current_price`, `market_cap`, `total_volume`).
-    *   Applies `StandardScaler` to normalize the features, which is crucial for logistic regression.
-3.  **Model Training:** Splits the data into training and testing sets and trains a `LogisticRegression` model from the `scikit-learn` library.
-4.  **Artifact Saving:** The trained model and the fitted scaler are serialized and saved as `.joblib` files (`logistic_regression_model.joblib`, `scaler.joblib`) within the `predictions` app directory.
-
-### 3. How It Works: API and Frontend
-
-#### **Prediction API (`/predictions/crypto-predictions/`)**
-
-*   An API endpoint was created to serve the model's predictions.
-*   When called, this endpoint loads the saved model and scaler.
-*   It fetches the latest crypto data, preprocesses it using the saved scaler, and feeds it to the model.
-*   The API returns a JSON response containing the prediction ("Up" or "Down") for each cryptocurrency.
-
-#### **Frontend Integration**
-
-*   The `crypto_market_overview` view has been updated to call the prediction API.
-*   The predictions are merged with the cryptocurrency data being displayed.
-*   A new **"Prediction"** column is now visible in the main data table on the home page, showing the model's prediction for each coin.
-
-### 4. Automated Retraining with Airflow
-
-*   A new DAG, `retrain_crypto_prediction_model`, has been added.
-*   **Purpose:** This DAG automatically re-runs the `train_model.py` script on a daily schedule.
-*   This ensures the model is continuously retrained with the latest market data, preventing model drift and maintaining its relevance over time.
+*   **ETL DAGs:**
+    *   `cryptocurrencymarket.py`: Ingests data from CoinGecko.
+    *   `binance_ticker_ingestion.py`: Ingests data from Binance.
+    *   `wazirx_ticker_ingestion.py`: Ingests data from WazirX.
+*   **ML DAG:**
+    *   `retrain_model_dag.py`: Automatically retrains all three predictive models (CoinGecko, Binance, and WazirX) on a daily schedule to prevent model drift.
+*   **Orchestration DAG:**
+    *   `main_pipeline.py`: A master DAG that orchestrates the execution of all other DAGs.
 
 ---
 
@@ -169,60 +141,57 @@ A dedicated script handles the end-to-end process of training and saving the mod
 ## 🐳 **Docker Compose Services**
 
 * `mongodb` (default port 27017)
-* `postgresql` (Airflow metadata database)
-* `airflow-webserver` (port 8080)
-* `airflow-scheduler`
-* `django-web` (optional, for Django app container)
-* `streamlit-dashboard` (optional, port 8501 if using Streamlit frontend)
-
-Start all services:
-
-```bash
-docker compose up --build
-```
+* `postgres` (Airflow metadata database)
+* `webserver` (Airflow webserver, port 8080)
+* `scheduler` (Airflow scheduler)
+* `django` (Django web application, port 8000)
 
 ---
 
 ## ⚡ **How to Run the Project**
 
-1. Clone the repository and enter the project folder:
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/RusselKu/CryptoInsight.git
+    cd Web-based-Information-Management-and-Consultation-System
+    ```
 
-```bash
-git clone https://github.com/RusselKu/CryptoInsight.git
-cd UPY-Crypto-Market-Pipeline
-```
+2.  **Initialize the Airflow database:**
+    ```bash
+    docker compose run --rm webserver airflow db init
+    ```
 
-2. Initialize the Airflow database:
+3.  **Create an Airflow admin user:**
+    ```bash
+    docker compose run --rm webserver airflow users create \
+        --username airflow \
+        --firstname Admin \
+        --lastname User \
+        --role Admin \
+        --email admin@example.com \
+        --password airflow
+    ```
 
-```bash
-docker compose run --rm airflow-webserver airflow db init
-```
+4.  **Build and start all containers:**
+    ```bash
+    docker compose up --build -d
+    ```
 
-3. Create an Airflow admin user:
+5.  **Access the services:**
+    *   **Airflow UI:** [http://localhost:8080](http://localhost:8080)
+    *   **Django Dashboard:** [http://localhost:8000/dashboard/](http://localhost:8000/dashboard/)
+    *   **MongoDB Compass (optional):**
+        `mongodb://root:example@localhost:27017/project_db?authSource=admin`
 
-```bash
-docker compose run --rm airflow-webserver airflow users create \
-    --username airflow \
-    --firstname Admin \
-    --lastname User \
-    --role Admin \
-    --email admin@example.com \
-    --password airflow
-```
+6.  **Train the predictive models:**
+    To see the predictions, you need to run the training scripts for each model at least once.
+    ```bash
+    docker compose exec django python /app/predictions/train_model.py
+    docker compose exec django python /app/predictions/train_binance.py
+    docker compose exec django python /app/predictions/train_wazirx.py
+    ```
 
-4. Build and start all containers:
-
-```bash
-docker compose up --build
-```
-
-5. Access the services:
-
-* Airflow UI: [http://localhost:8080](http://localhost:8080)
-* Django Dashboard: [http://localhost:8000/dashboard/](http://localhost:8000/dashboard/)
-* MongoDB Compass (optional):
-  `mongodb://root:example@localhost:27017/project_db?authSource=admin`
-
+---
 
 ## 🛠️ **Custom Django Admin Panel and Security**
 
