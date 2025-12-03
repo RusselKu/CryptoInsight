@@ -59,7 +59,7 @@ dist/
 # Machine Learning Artifacts and Environment
 *.joblib
 .venv/
-reporte_progreso.md
+
 propuestas_futuras.md
 Protocolo_Proyecto_DataMiningV2.pdf
 contexto.md

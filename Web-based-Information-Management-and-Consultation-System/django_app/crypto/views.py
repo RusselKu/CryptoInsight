@@ -209,12 +209,35 @@ def binance_market_data(request):
             columns_to_show = [
                 "symbol", "price_change", "low_price", "high_price"
             ]
-            df = pd.DataFrame(binance_data)[columns_to_show]
+            df = pd.DataFrame(binance_data)
 
-            # Filtrar filas con valores 0 en columnas numéricas
+            # --- Call Prediction API ---
+            try:
+                prediction_url = "http://localhost:8000/predictions/binance/"
+                response = requests.get(prediction_url)
+                response.raise_for_status() 
+                predictions_data = response.json().get('predictions', [])
+                
+                if predictions_data:
+                    preds_df = pd.DataFrame(predictions_data)[['symbol', 'prediction']]
+                    preds_df['Prediction'] = preds_df['prediction'].apply(lambda x: 'Up' if x == 1 else 'Down')
+                    
+                    df = pd.merge(df, preds_df[['symbol', 'Prediction']], on='symbol', how='left')
+                    # Add 'Prediction' to the columns to show if it's not already there
+                    columns_to_show.append('Prediction')
+
+            except requests.exceptions.RequestException as e:
+                print(f"Could not get Binance predictions from API: {e}")
+                df['Prediction'] = 'N/A' 
+            # --- End Prediction API Call ---
+
+            # Filter rows with 0 values in numeric columns AFTER prediction merge
             numeric_cols = ["price_change", "low_price", "high_price"]
             for col in numeric_cols:
                 df = df[df[col] != 0]
+            
+            df = df[columns_to_show] # Apply column selection after merge
+
 
             # Formatear números a 4 decimales
             df["price_change"] = df["price_change"].astype(float).map(lambda x: f"{x:.4f}")
@@ -292,6 +315,7 @@ def binance_market_data(request):
                 "table_html": table_html,
                 "scatter_chart": json.dumps(scatter_chart),
                 "bar_chart": json.dumps(bar_chart),
+                "symbols": df['Symbol'].unique().tolist()
             }
         else:
             context["warning"] = "No Binance ticker data found."
@@ -311,9 +335,31 @@ def wazirx_market_data(request):
         metadata = latest.get("metadata", {})
 
         if wazirx_data:
-            # Solo columnas necesarias
             columns_to_show = ["symbol", "open_price", "high_price", "low_price"]
-            df = pd.DataFrame(wazirx_data)[columns_to_show]
+            df = pd.DataFrame(wazirx_data)
+
+            # --- Call Prediction API ---
+            try:
+                print("--- Calling WazirX Prediction API ---")
+                prediction_url = "http://localhost:8000/predictions/wazirx/"
+                response = requests.get(prediction_url)
+                response.raise_for_status() 
+                predictions_data = response.json().get('predictions', [])
+                
+                if predictions_data:
+                    preds_df = pd.DataFrame(predictions_data)[['symbol', 'prediction']]
+                    preds_df['Prediction'] = preds_df['prediction'].apply(lambda x: 'Up' if x == 1 else 'Down')
+                    
+                    df = pd.merge(df, preds_df[['symbol', 'Prediction']], on='symbol', how='left')
+                    columns_to_show.append('Prediction')
+
+            except requests.exceptions.RequestException as e:
+                print(f"Could not get WazirX predictions from API: {e}")
+                df['Prediction'] = 'N/A' 
+            # --- End Prediction API Call ---
+
+            # Solo columnas necesarias
+            df = df[columns_to_show]
 
             # Filtrar ceros
             numeric_cols = ["open_price", "high_price", "low_price"]
@@ -389,6 +435,7 @@ def wazirx_market_data(request):
                 "graph_json_bar": graph_json_bar,
                 "graph_json_line": graph_json_line,
                 "graph_json_scatter": graph_json_scatter,
+                "symbols": df['Symbol'].unique().tolist()
             }
         else:
             context["warning"] = "No WazirX ticker data found."

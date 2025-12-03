@@ -119,6 +119,18 @@
             <div id="bar-chart"></div>
         </div>
 
+        <div class="chart-container">
+            <h2>📈 Historical Price Chart</h2>
+            <select id="symbol-select">
+                <option value="">Select a Symbol</option>
+                {% for symbol in symbols %}
+                    <option value="{{ symbol }}">{{ symbol }}</option>
+                {% endfor %}
+            </select>
+            <button id="load-chart-btn">Load Chart</button>
+            <div id="historical-chart"></div>
+        </div>
+
         <!-- Tabla -->
         <h2>📋 Filtered Binance Data</h2>
         <div>
@@ -170,6 +182,52 @@
     Plotly.newPlot('scatter-chart', scatterData.data, scatterData.layout);
     Plotly.newPlot('bar-chart', barData.data, barData.layout);
 {% endif %}
+
+document.getElementById('load-chart-btn').addEventListener('click', function() {
+    const symbol = document.getElementById('symbol-select').value;
+    if (!symbol) {
+        alert('Please select a symbol.');
+        return;
+    }
+
+    fetch(`/predictions/binance/history/${symbol}/`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+                return;
+            }
+
+            const historicalData = data.historical_data;
+            const trace = {
+                x: historicalData.map(d => d.timestamp),
+                y: historicalData.map(d => d.last_price),
+                mode: 'lines+markers',
+                type: 'scatter',
+                name: symbol
+            };
+
+            const layout = {
+                title: `Historical Price for ${symbol}`,
+                xaxis: { title: 'Timestamp' },
+                yaxis: { title: 'Price' },
+                plot_bgcolor: "#1f4037",
+                paper_bgcolor: "#1f4037",
+                font: { color: "#fff" }
+            };
+
+            Plotly.newPlot('historical-chart', [trace], layout);
+        })
+        .catch(error => {
+            console.error('Error fetching historical data:', error);
+            alert('An error occurred while fetching historical data.');
+        });
+});
 </script>
 
 </body>
