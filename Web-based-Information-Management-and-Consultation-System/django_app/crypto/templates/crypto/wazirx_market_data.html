@@ -1,146 +1,51 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>📂 WazirX 24h Market Data</title>
+{% extends "crypto/base.html" %}
+{% block title %}📂 WazirX 24h Market Data{% endblock %}
+
+{% block extra_head %}
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <link rel="stylesheet" href="{% static 'crypto/css/styles.css' %}">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
-    <div class="back-button">
-        <a href="{% url 'main_dashboard' %}">&larr; Back to Main Dashboard</a>
+{% endblock %}
+
+{% block content %}
+    <div class="wazirx-body">
+        <h1 class="wazirx-h1">📂 WazirX 24h Market Data</h1>
+
+        {% if warning %}
+            <p style="color: orange; text-align: center; font-weight: bold;">{{ warning }}</p>
+        {% else %}
+            <div class="wazirx-info">
+                <strong>Symbols Tracked:</strong> {{ total_symbols }}<br />
+                <strong>Top Pair:</strong> {{ top_symbol }}<br />
+                <strong>Source:</strong> {{ source }}
+            </div>
+
+            <h2 class="wazirx-h2">📊 High vs Low Price (Top 10 by High Price)</h2>
+            <div id="wazirx-chart-bar" class="wazirx-chart-bar"></div>
+
+            <h2 class="wazirx-h2">📈 Open Price (Top 10 by High Price)</h2>
+            <div id="wazirx-chart-line" class="wazirx-chart-line"></div>
+
+            <div class="chart-container">
+                <h2 class="wazirx-h2">📈 Historical Price Chart</h2>
+                <select id="symbol-select">
+                    <option value="">Select a Symbol</option>
+                    {% for symbol in symbols %}
+                        <option value="{{ symbol }}">{{ symbol }}</option>
+                    {% endfor %}
+                </select>
+                <button id="load-chart-btn">Load Chart</button>
+                <div id="historical-chart"></div>
+            </div>
+
+            <h2 class="wazirx-h2">📋 Filtered WazirX Data</h2>
+            <div>
+                {{ table_html|safe }}
+            </div>
+        {% endif %}
     </div>
-    <style>
-        body {
-            margin: 0;
-            font-family: 'Montserrat', sans-serif;
-            background: linear-gradient(to right, #141e30, #243b55);
-            color: #fff;
-            padding: 2rem;
-        }
-        h1, h2 {
-            text-align: center;
-        }
-        h1 {
-            font-size: 2.5rem;
-            color: #00e5ff;
-            text-shadow: 1px 1px 4px #000;
-        }
-        h2 {
-            color: #ffe600;
-            margin-top: 2rem;
-        }
-        .info {
-            background-color: rgba(255,255,255,0.1);
-            padding: 1rem;
-            border-radius: 12px;
-            max-width: 600px;
-            margin: 1rem auto;
-            text-align: center;
-            font-size: 1.1rem;
-            box-shadow: 0 0 12px rgba(255, 255, 224, 0.4);
-        }
-        #wazirx-chart-bar, #wazirx-chart-line {
-            margin-top: 2rem;
-            max-width: 900px;
-            margin-left: auto;
-            margin-right: auto;
-            border-radius: 12px;
-            padding: 1rem;
-            background: rgba(255, 255, 255, 0.05);
-            box-shadow: 0 0 18px rgba(0, 229, 255, 0.5);
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 1.5rem;
-            background: rgba(255, 255, 255, 0.9);
-            color: #222;
-            border-radius: 12px;
-            overflow: hidden;
-        }
-        th, td {
-            padding: 0.75rem;
-            text-align: center;
-            border: 1px solid #ddd;
-        }
-        th {
-            background: linear-gradient(to right, #005f73, #0a9396);
-            color: white;
-        }
-        tr:hover {
-            background-color: #f0f8ff;
-            transition: background-color 0.3s ease;
-        }
-        td img {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        td img:hover {
-            transform: scale(1.2);
-            box-shadow: 0 0 12px rgba(0, 229, 255, 0.6);
-        }
-        .back-button {
-            margin-top: 2rem;
-            text-align: center;
-        }
-        .back-button a {
-            background-color: #003366;
-            color: white;
-            padding: 0.75rem 1.5rem;
-            text-decoration: none;
-            font-weight: bold;
-            border-radius: 8px;
-            transition: background 0.3s;
-        }
-        .back-button a:hover {
-            background-color: #0059b3;
-        }
-    </style>
-</head>
-<body>
-    <h1>📂 WazirX 24h Market Data</h1>
+{% endblock %}
 
-    {% if warning %}
-        <p style="color: orange; text-align: center; font-weight: bold;">{{ warning }}</p>
-    {% else %}
-        <div class="info">
-            <strong>Symbols Tracked:</strong> {{ total_symbols }}<br />
-            <strong>Top Pair:</strong> {{ top_symbol }}<br />
-            <strong>Source:</strong> {{ source }}
-        </div>
-
-        <h2>📊 High vs Low Price (Top 10 by High Price)</h2>
-        <div id="wazirx-chart-bar"></div>
-
-        <h2>📈 Open Price (Top 10 by High Price)</h2>
-        <div id="wazirx-chart-line"></div>
-
-        <div class="chart-container">
-            <h2>📈 Historical Price Chart</h2>
-            <select id="symbol-select">
-                <option value="">Select a Symbol</option>
-                {% for symbol in symbols %}
-                    <option value="{{ symbol }}">{{ symbol }}</option>
-                {% endfor %}
-            </select>
-            <button id="load-chart-btn">Load Chart</button>
-            <div id="historical-chart"></div>
-        </div>
-
-        <h2>📋 Filtered WazirX Data</h2>
-        <div>
-            {{ table_html|safe }}
-        </div>
-    {% endif %}
-
-    <div class="back-button">
-        <a href="{% url 'main_dashboard' %}">&larr; Back to Main Dashboard</a>
-    </div>
-
+{% block extra_js %}
     <script>
         {% if graph_json_bar and graph_json_line %}
             var graphBar = JSON.parse('{{ graph_json_bar|escapejs }}');
@@ -245,5 +150,4 @@
                 });
         });
     </script>
-</body>
-</html>
+{% endblock %}

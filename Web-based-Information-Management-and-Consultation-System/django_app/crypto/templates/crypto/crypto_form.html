@@ -1,16 +1,13 @@
-{% extends "base.html" %}
+{% extends "crypto/base.html" %}
 
 {% block content %}
-  {% if user.is_authenticated %}
-    <p>Logged in as {{ user.username }} | <a href="{% url 'logout' %}">Logout</a></p>
-  {% else %}
-    <p><a href="{% url 'login' %}">Login</a></p>
-  {% endif %}
+  <div class="form-container">
 
-  <h2>{% if form.instance and form.instance.pk %}Edit{% else %}Add{% endif %} Crypto Market</h2>
-  <form method="post">{% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Save</button>
-    <a href="{% url 'crypto_list' %}">Cancel</a>
-  </form>
+    <h2 class="form-container-h2">{% if form.instance and form.instance.pk %}Edit{% else %}Add{% endif %} Crypto Market</h2>
+    <form method="post" class="crypto-form">{% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit">Save</button>
+      <a href="{% url 'crypto_list' %}" class="cancel-link">Cancel</a>
+    </form>
+  </div>
 {% endblock %}

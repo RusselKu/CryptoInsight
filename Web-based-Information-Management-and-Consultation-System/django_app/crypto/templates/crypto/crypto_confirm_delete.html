@@ -1,16 +1,13 @@
-{% extends "base.html" %}
+{% extends "crypto/base.html" %}
 
 {% block content %}
-  {% if user.is_authenticated %}
-    <p>Logged in as {{ user.username }} | <a href="{% url 'logout' %}">Logout</a></p>
-  {% else %}
-    <p><a href="{% url 'login' %}">Login</a></p>
-  {% endif %}
+  <div class="delete-container">
 
-  <h2>Delete Crypto Market</h2>
-  <p>Are you sure you want to delete {{ item.symbol }}?</p>
-  <form method="post">{% csrf_token %}
-    <button type="submit">Confirm Delete</button>
-    <a href="{% url 'crypto_list' %}">Cancel</a>
-  </form>
+    <h2>Delete Crypto Market</h2>
+    <p>Are you sure you want to delete {{ item.symbol }}?</p>
+    <form method="post">{% csrf_token %}
+      <button type="submit">Confirm Delete</button>
+      <a href="{% url 'crypto_list' %}" class="cancel-link">Cancel</a>
+    </form>
+  </div>
 {% endblock %}

@@ -1,145 +1,56 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>📊 Binance 24h Market Data</title>
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
+{% extends "crypto/base.html" %}
+{% block title %}📊 Binance 24h Market Data{% endblock %}
+
+{% block extra_head %}
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <div class="back-button">
-        <a href="{% url 'main_dashboard' %}">&larr; Back to Main Dashboard</a>
+{% endblock %}
+
+{% block content %}
+    <div class="binance-body">
+        <h1 class="binance-h1">📊 Binance 24h Market Data</h1>
+
+        {% if warning %}
+            <p style="color: orange; text-align: center; font-weight: bold;">{{ warning }}</p>
+        {% else %}
+            <div class="binance-info">
+                <strong>Symbols Tracked:</strong> {{ total_symbols }}<br />
+                <strong>Top Symbol:</strong> {{ top_symbol }}<br />
+                <strong>Source:</strong> {{ source }}
+            </div>
+
+            <!-- Gráficas -->
+            <div class="chart-container binance-chart-container">
+                <h2 class="binance-h2">🌈 Scatter Plot: Price Difference (High - Low)</h2>
+                <div id="scatter-chart"></div>
+            </div>
+
+            <div class="chart-container binance-chart-container">
+                <h2 class="binance-h2">📶 Bar Chart: Price Change vs Lowest Price</h2>
+                <div id="bar-chart"></div>
+            </div>
+
+            <div class="chart-container binance-chart-container">
+                <h2 class="binance-h2">📈 Historical Price Chart</h2>
+                <select id="symbol-select">
+                    <option value="">Select a Symbol</option>
+                    {% for symbol in symbols %}
+                        <option value="{{ symbol }}">{{ symbol }}</option>
+                    {% endfor %}
+                </select>
+                <button id="load-chart-btn">Load Chart</button>
+                <div id="historical-chart"></div>
+            </div>
+
+            <!-- Tabla -->
+            <h2 class="binance-h2">📋 Filtered Binance Data</h2>
+            <div>
+                {{ table_html|safe }}
+            </div>
+        {% endif %}
     </div>
-<style>
-    body {
-        margin: 0;
-        font-family: 'Roboto', sans-serif;
-        background: linear-gradient(to right, #1f4037, #99f2c8);
-        color: #fff;
-        padding: 2rem;
-    }
-    h1, h2 {
-        text-align: center;
-    }
-    h1 {
-        font-size: 2.5rem;
-        color: #ffe600;
-        text-shadow: 1px 1px 4px #000;
-    }
-    h2 {
-        margin-top: 2rem;
-        color: #ffffff;
-    }
-    .info {
-        background-color: rgba(0,0,0,0.4);
-        padding: 1rem;
-        border-radius: 12px;
-        max-width: 600px;
-        margin: 0 auto 2rem auto;
-        text-align: center;
-    }
-    table {
-        border-collapse: collapse;
-        width: 100%;
-        margin-top: 1rem;
-        background: rgba(255, 255, 255, 0.85);
-        color: #222;
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 0 20px rgba(255,255,255,0.3);
-        animation: fadeIn 0.8s ease-in-out;
-    }
-    th, td {
-        border: 1px solid #ddd;
-        padding: 0.75rem;
-        text-align: center;
-    }
-    th {
-        background: linear-gradient(90deg, #6a11cb, #2575fc);
-        color: white;
-        text-transform: uppercase;
-        font-size: 0.95rem;
-    }
-    tr:hover {
-        background-color: rgba(173, 216, 230, 0.3);
-        transition: 0.3s;
-    }
-    .chart-container {
-        max-width: 900px;
-        margin: 2rem auto;
-        background: rgba(255,255,255,0.1);
-        border-radius: 12px;
-        padding: 1rem;
-        box-shadow: 0 0 20px rgba(255,255,255,0.2);
-    }
-    .back-button {
-        margin-top: 2rem;
-        display: flex;
-        justify-content: center;
-    }
-    .back-button a {
-        background-color: #003366;
-        color: white;
-        padding: 0.75rem 1.5rem;
-        text-decoration: none;
-        font-weight: bold;
-        border-radius: 8px;
-        transition: background 0.3s;
-    }
-    .back-button a:hover {
-        background-color: #0059b3;
-    }
+{% endblock %}
 
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-</style>
-</head>
-<body>
-    <h1>📊 Binance 24h Market Data</h1>
-
-    {% if warning %}
-        <p style="color: orange; text-align: center; font-weight: bold;">{{ warning }}</p>
-    {% else %}
-        <div class="info">
-            <strong>Symbols Tracked:</strong> {{ total_symbols }}<br />
-            <strong>Top Symbol:</strong> {{ top_symbol }}<br />
-            <strong>Source:</strong> {{ source }}
-        </div>
-
-        <!-- Gráficas -->
-        <div class="chart-container">
-            <h2>🌈 Scatter Plot: Price Difference (High - Low)</h2>
-            <div id="scatter-chart"></div>
-        </div>
-
-        <div class="chart-container">
-            <h2>📶 Bar Chart: Price Change vs Lowest Price</h2>
-            <div id="bar-chart"></div>
-        </div>
-
-        <div class="chart-container">
-            <h2>📈 Historical Price Chart</h2>
-            <select id="symbol-select">
-                <option value="">Select a Symbol</option>
-                {% for symbol in symbols %}
-                    <option value="{{ symbol }}">{{ symbol }}</option>
-                {% endfor %}
-            </select>
-            <button id="load-chart-btn">Load Chart</button>
-            <div id="historical-chart"></div>
-        </div>
-
-        <!-- Tabla -->
-        <h2>📋 Filtered Binance Data</h2>
-        <div>
-            {{ table_html|safe }}
-        </div>
-    {% endif %}
-
-
-
+{% block extra_js %}
 <script>
 {% if scatter_chart and bar_chart %}
     let scatterData = JSON.parse('{{ scatter_chart|escapejs }}');
@@ -229,6 +140,4 @@ document.getElementById('load-chart-btn').addEventListener('click', function() {
         });
 });
 </script>
-
-</body>
-</html>
+{% endblock %}

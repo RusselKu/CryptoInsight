@@ -1,0 +1,55 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}CryptoInsight{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'crypto/css/styles.css' %}">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet" />
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+  <canvas id="backgroundCanvas"></canvas>
+  <header class="main-header">
+    <div class="header-content">
+      <div class="logo">
+        <a href="{% url 'main_dashboard' %}">CryptoInsight</a>
+      </div>
+      <div class="menu-toggle" id="mobile-menu">
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+      </div>
+      <nav class="main-nav">
+        <ul class="nav-list">
+          <li><a href="{% url 'main_dashboard' %}" class="nav-link">Home</a></li>
+          <li><a href="{% url 'crypto_market_overview' %}" class="nav-link">Market Overview</a></li>
+          <li><a href="{% url 'binance_market_data' %}" class="nav-link">Binance</a></li>
+          <li><a href="{% url 'wazirx_market_data' %}" class="nav-link">WazirX</a></li>
+          <li><a href="{% url 'crypto_list' %}" class="nav-link">Manage Cryptos</a></li>
+        </ul>
+      </nav>
+      <div class="auth-links">
+        {% if user.is_authenticated %}
+          <span class="welcome-message">Welcome, {{ user.username }}!</span>
+          <a href="{% url 'logout' %}" class="auth-link logout-link">Logout</a>
+        {% else %}
+          <a href="{% url 'login' %}" class="auth-link login-link">Login</a>
+        {% endif %}
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    {% block content %}{% endblock %}
+  </div>
+
+  <footer class="main-footer">
+    <p>&copy; 2025 CryptoInsight. All rights reserved.</p>
+  </footer>
+  <script src="{% static 'crypto/js/main.js' %}"></script>
+  <script src="{% static 'crypto/js/background_animation.js' %}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

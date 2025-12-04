@@ -10,8 +10,8 @@ urlpatterns = [
     path('dashboard/', views.main_dashboard, name='main_dashboard'),
 
     # Panel admin custom (CRUD)
-    path('admin/cryptomarket/', views.crypto_list, name='crypto_list'),
-    path('admin/cryptomarket/add/', views.crypto_create, name='crypto_create'),
-    path('admin/cryptomarket/edit/<str:pk>/', views.crypto_edit, name='crypto_edit'),
-    path('admin/cryptomarket/delete/<str:pk>/', views.crypto_delete, name='crypto_delete'),
+    path('cryptomarket/', views.crypto_list, name='crypto_list'),
+    path('cryptomarket/add/', views.crypto_create, name='crypto_create'),
+    path('cryptomarket/edit/<str:pk>/', views.crypto_edit, name='crypto_edit'),
+    path('cryptomarket/delete/<str:pk>/', views.crypto_delete, name='crypto_delete'),
 ]
